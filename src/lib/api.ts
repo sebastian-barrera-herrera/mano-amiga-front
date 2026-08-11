@@ -7,10 +7,12 @@ import type {
   ReportInput,
   ReportStats,
   UploadSignature,
+  UploadStatus,
   User,
 } from '../types';
 
-const BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+export const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+const BASE_URL = API_BASE_URL;
 const TOKEN_KEY = 'manoamiga.token';
 
 export class ApiError extends Error {
@@ -75,13 +77,25 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   if (response.status === 204) return undefined as T;
 
-  const payload = await response.json().catch(() => null);
+  const isJson = response.headers.get('content-type')?.includes('application/json') ?? false;
+  const payload = isJson ? await response.json().catch(() => null) : null;
 
   if (!response.ok) {
     const message =
       (payload as { message?: string } | null)?.message ??
       'No pudimos completar la acción. Intenta de nuevo.';
     throw new ApiError(message, response.status, (payload as { errors?: string[] } | null)?.errors);
+  }
+
+  // Una respuesta correcta que no sea JSON significa que no estamos hablando
+  // con la API: lo típico es que VITE_API_URL falte y la petición acabe en la
+  // regla de SPA del hosting, que devuelve index.html con estado 200. Sin este
+  // control, la app se quedaría con datos nulos y sin ningún aviso.
+  if (!isJson) {
+    throw new ApiError(
+      `La dirección ${BASE_URL} no está respondiendo como API. Revisa la variable VITE_API_URL.`,
+      response.status,
+    );
   }
 
   return payload as T;
@@ -169,8 +183,7 @@ export const api = {
   me: (signal?: AbortSignal) => request<User>('/auth/me', { signal }),
 
   // ── Fotos ─────────────────────────────────────────────────────────────────
-  uploadStatus: (signal?: AbortSignal) =>
-    request<{ enabled: boolean }>('/uploads/status', { signal }),
+  uploadStatus: (signal?: AbortSignal) => request<UploadStatus>('/uploads/status', { signal }),
 
   uploadSignature: () => request<UploadSignature>('/uploads/signature'),
 };

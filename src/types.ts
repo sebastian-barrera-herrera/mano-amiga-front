@@ -108,6 +108,18 @@ export interface AuthResult {
   user: User;
 }
 
+/**
+ * `cloudinary`: el navegador sube la foto directamente al CDN.
+ * `database`: la foto se envía a la API y se guarda en PostgreSQL.
+ */
+export type UploadMode = 'cloudinary' | 'database';
+
+export interface UploadStatus {
+  enabled: boolean;
+  mode: UploadMode;
+  maxBytes: number;
+}
+
 export interface UploadSignature {
   cloudName: string;
   apiKey: string;

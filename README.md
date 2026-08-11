@@ -74,8 +74,11 @@ Dos detalles que importan:
 - Enlace *«Saltar al contenido»*, foco visible y navegación completa por teclado.
 - Los campos usan 16 px para que iOS no haga zoom al escribir.
 - **Compresión de imágenes en el propio dispositivo** (máx. 1280 px, JPEG) antes de subirlas,
-  con barra de progreso real.
-- Las fotos llegan optimizadas desde Cloudinary (`f_auto,q_auto` y ancho según el hueco).
+  con barra de progreso real: una foto de 2 MB acaba pesando unos 25-50 KB.
+- La foto va a donde diga la API: al CDN de Cloudinary si está configurado, o a la base de datos
+  si no. El formulario es idéntico en los dos casos.
+- Cuando vienen de Cloudinary, las fotos llegan optimizadas (`f_auto,q_auto` y ancho según el
+  hueco donde se muestran).
 - **Carga diferida por pantalla** y `loading="lazy"` en las fotos del listado: la carga inicial
   son ~80 KB comprimidos.
 - **Service worker** que guarda el armazón de la app para que abra con red intermitente. Nunca

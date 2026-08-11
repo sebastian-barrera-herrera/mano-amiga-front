@@ -12,7 +12,7 @@ import { toDateTimeLocal } from '../lib/format';
 import { getFormConfig, variantFor, type FieldDef, type ReportFormConfig } from '../lib/reportForms';
 import { contactStorage } from '../lib/storage';
 import type { UploadedPhoto } from '../lib/uploads';
-import type { Report, ReportInput } from '../types';
+import type { Report, ReportInput, UploadMode } from '../types';
 
 type Values = Record<string, string>;
 
@@ -25,18 +25,21 @@ export default function ReportFormPage() {
   const [config, setConfig] = useState<ReportFormConfig | null>(() => getFormConfig(variant));
   const [values, setValues] = useState<Values>({});
   const [photo, setPhoto] = useState<UploadedPhoto | null>(null);
+  const [photoTouched, setPhotoTouched] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(isEditing);
-  const [uploadsEnabled, setUploadsEnabled] = useState(false);
+  const [uploadMode, setUploadMode] = useState<UploadMode | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
     api
       .uploadStatus(controller.signal)
-      .then(({ enabled }) => setUploadsEnabled(enabled))
-      .catch(() => setUploadsEnabled(false));
+      .then((status) => setUploadMode(status.mode))
+      // Si la API no responde, se asume la base de datos: es el modo que no
+      // depende de ningún servicio externo.
+      .catch(() => setUploadMode('database'));
     return () => controller.abort();
   }, []);
 
@@ -126,11 +129,13 @@ export default function ReportFormPage() {
       const payload = buildPayload(config, values, photo);
       const report =
         isEditing && id
-          ? await api.updateReport(id, {
+          ? // Los campos de foto sólo viajan si se cambió: enviarlos siempre
+            // haría que el backend liberase la imagen que ya tenía el reporte.
+            await api.updateReport(id, {
               ...payload,
-              // En edición se envía `null` explícito para poder quitar la foto.
-              photoUrl: photo?.url ?? null,
-              photoPublicId: photo?.publicId || null,
+              ...(photoTouched
+                ? { photoUrl: photo?.url ?? null, photoPublicId: photo?.publicId || null }
+                : { photoUrl: undefined, photoPublicId: undefined }),
             })
           : await api.createReport(payload);
 
@@ -196,8 +201,11 @@ export default function ReportFormPage() {
           <legend className="mb-4 text-base font-bold text-slate-900">Foto</legend>
           <PhotoUpload
             value={photo}
-            onChange={setPhoto}
-            enabled={uploadsEnabled}
+            onChange={(next) => {
+              setPhoto(next);
+              setPhotoTouched(true);
+            }}
+            mode={uploadMode}
             help={config.photoHelp}
           />
         </fieldset>

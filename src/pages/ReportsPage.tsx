@@ -38,7 +38,11 @@ export default function ReportsPage() {
 
   const [searchTerm, setSearchTerm] = useState(q);
 
-  useEffect(() => setSearchTerm(q), [q]);
+  // Con llaves, para no devolver por accidente el resultado de setSearchTerm
+  // como función de limpieza del efecto.
+  useEffect(() => {
+    setSearchTerm(q);
+  }, [q]);
 
   useEffect(() => {
     const controller = new AbortController();

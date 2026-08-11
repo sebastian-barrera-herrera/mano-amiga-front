@@ -1,42 +1,34 @@
 import { useRef, useState } from 'react';
 import { optimizedImage } from '../lib/image';
 import { uploadPhoto, type UploadedPhoto } from '../lib/uploads';
-import { Alert } from './Alert';
+import type { UploadMode } from '../types';
 import { CameraIcon, TrashIcon } from './Icons';
 
 interface PhotoUploadProps {
   value: UploadedPhoto | null;
   onChange: (photo: UploadedPhoto | null) => void;
-  enabled: boolean;
+  /** `null` mientras se consulta a la API dónde debe guardarse la foto. */
+  mode: UploadMode | null;
   help?: string;
 }
 
-export function PhotoUpload({ value, onChange, enabled, help }: PhotoUploadProps) {
+export function PhotoUpload({ value, onChange, mode, help }: PhotoUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleFile(file: File | undefined) {
-    if (!file) return;
+    if (!file || !mode) return;
     setError(null);
     setProgress(0);
     try {
-      onChange(await uploadPhoto(file, setProgress));
+      onChange(await uploadPhoto(file, mode, setProgress));
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : 'No pudimos subir la foto.');
     } finally {
       setProgress(null);
       if (inputRef.current) inputRef.current.value = '';
     }
-  }
-
-  if (!enabled) {
-    return (
-      <Alert tone="info">
-        Las fotos no están disponibles en este momento. Puedes publicar el reporte igual: describe
-        con detalle la apariencia en el campo de descripción.
-      </Alert>
-    );
   }
 
   return (
@@ -66,12 +58,16 @@ export function PhotoUpload({ value, onChange, enabled, help }: PhotoUploadProps
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={progress !== null}
+          disabled={progress !== null || mode === null}
           className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-slate-600 transition-colors hover:border-brand-400 hover:bg-brand-50 disabled:opacity-60"
         >
           <CameraIcon className="h-8 w-8 text-brand-800" />
           <span className="text-sm font-semibold">
-            {progress === null ? 'Tomar o elegir una foto' : `Subiendo… ${progress}%`}
+            {progress !== null
+              ? `Subiendo… ${progress}%`
+              : mode === null
+                ? 'Preparando…'
+                : 'Tomar o elegir una foto'}
           </span>
           <span className="text-xs text-slate-500">JPG o PNG · se optimiza automáticamente</span>
         </button>

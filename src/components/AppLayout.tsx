@@ -16,7 +16,13 @@ export function AppLayout() {
   const { user } = useAuth();
 
   // Cada navegación empieza arriba: en móvil es lo que se espera.
-  useEffect(() => window.scrollTo(0, 0), [pathname]);
+  // El cuerpo va entre llaves a propósito: con `() => window.scrollTo(0, 0)`,
+  // React tomaría el valor devuelto como función de limpieza, y basta con una
+  // extensión del navegador que envuelva scrollTo y devuelva algo para que
+  // reviente al navegar.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
