@@ -140,13 +140,21 @@ componentes**: son cuatro configuraciones en [`lib/reportForms.ts`](src/lib/repo
 
 ## Despliegue en Netlify
 
+Sitio en producción: **https://manoamigacolombia.netlify.app**
+
 Con [`netlify.toml`](netlify.toml) casi todo está hecho. Sólo hay que:
 
 1. Conectar el repositorio (**Add new site → Import an existing project**).
-2. Definir `VITE_API_URL` = `https://tu-api.onrender.com/api`.
+2. En **Site configuration → Environment variables**, definir
+   `VITE_API_URL` = `https://mano-amiga-api.onrender.com/api` (o la URL que te dé Render,
+   siempre terminada en `/api`).
 3. Si usas Google, definir también `VITE_GOOGLE_CLIENT_ID`.
 
-Después del primer despliegue, pon la URL de Netlify en `CORS_ORIGINS` en Render.
+> **Ojo:** Vite incrusta las variables `VITE_*` **al compilar**, no al ejecutar. Si cambias
+> `VITE_API_URL` hay que lanzar un *redeploy* para que surta efecto; recargar el navegador no
+> basta.
+
+En Render, `CORS_ORIGINS` debe llevar el dominio de este sitio.
 
 **Alternativa sin CORS:** en lugar de `VITE_API_URL`, añade un proxy en `netlify.toml` **antes**
 de la regla de la SPA. Así el navegador siempre habla con el mismo dominio:
