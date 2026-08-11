@@ -2,13 +2,35 @@ import { Suspense, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Spinner } from './Feedback';
-import { HomeIcon, ListIcon, MegaphoneIcon, UserIcon } from './Icons';
+import {
+  FacebookIcon,
+  HomeIcon,
+  ListIcon,
+  MegaphoneIcon,
+  UserIcon,
+  WhatsAppIcon,
+} from './Icons';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Inicio', icon: HomeIcon },
   { to: '/reportes', label: 'Reportes', icon: ListIcon },
   { to: '/muro', label: 'Muro', icon: MegaphoneIcon },
   { to: '/cuenta', label: 'Cuenta', icon: UserIcon },
+];
+
+const REDES_HEBATECH = [
+  {
+    label: 'Facebook de HebaTech',
+    href: 'https://www.facebook.com/profile.php?id=61587193170655',
+    icon: FacebookIcon,
+    hover: 'hover:bg-brand-50 hover:text-brand-800',
+  },
+  {
+    label: 'WhatsApp de HebaTech',
+    href: 'https://api.whatsapp.com/send/?phone=573148126301&text&type=phone_number&app_absent=0',
+    icon: WhatsAppIcon,
+    hover: 'hover:bg-emerald-50 hover:text-emerald-700',
+  },
 ];
 
 export function AppLayout() {
@@ -70,14 +92,17 @@ export function AppLayout() {
         </div>
       </header>
 
-      <main id="contenido" className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 pb-28 md:pb-12">
+      {/* El hueco para la navegación fija de móvil lo aporta ahora el pie. */}
+      <main id="contenido" className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 md:pb-12">
         <Suspense fallback={<Spinner />}>
           <Outlet />
         </Suspense>
       </main>
 
-      <footer className="hidden border-t border-slate-200 bg-white px-4 py-6 md:block">
-        <div className="mx-auto max-w-5xl text-center text-sm text-slate-500">
+      {/* En móvil el pie deja hueco abajo para no quedar tapado por la
+          navegación fija. */}
+      <footer className="border-t border-slate-200 bg-white px-4 pb-28 pt-6 md:pb-8">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-5 text-center text-sm text-slate-500">
           <p>
             ManoAmiga es una iniciativa ciudadana y gratuita. En una emergencia, llama primero al{' '}
             <a href="tel:123" className="font-semibold text-brand-800 underline">
@@ -85,6 +110,28 @@ export function AppLayout() {
             </a>
             .
           </p>
+
+          <div className="flex w-full flex-col items-center gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-center sm:gap-4">
+            <span>
+              Desarrollado por <strong className="font-semibold text-slate-700">HebaTech</strong>
+            </span>
+            <ul className="flex items-center gap-2">
+              {REDES_HEBATECH.map(({ label, href, icon: Icon, hover }) => (
+                <li key={href}>
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    title={label}
+                    className={`flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition-colors ${hover}`}
+                  >
+                    <Icon className="h-6 w-6" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </footer>
 
