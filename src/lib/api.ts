@@ -11,7 +11,19 @@ import type {
   User,
 } from '../types';
 
-export const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+/**
+ * La API vive siempre bajo `/api`, así que se añade si falta. Es muy fácil
+ * definir VITE_API_URL como `https://mi-api.onrender.com` a secas y entonces
+ * cada petición acabaría en una ruta que no existe.
+ * Sin variable se usa `/api`, que en desarrollo reenvía el proxy de Vite.
+ */
+function resolveApiBase(raw: string | undefined): string {
+  const value = (raw ?? '').trim().replace(/\/+$/, '');
+  if (!value) return '/api';
+  return value.endsWith('/api') ? value : `${value}/api`;
+}
+
+export const API_BASE_URL = resolveApiBase(import.meta.env.VITE_API_URL);
 const BASE_URL = API_BASE_URL;
 const TOKEN_KEY = 'manoamiga.token';
 
