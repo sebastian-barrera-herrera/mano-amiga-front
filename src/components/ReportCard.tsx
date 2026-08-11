@@ -11,16 +11,33 @@ export function ReportCard({ report }: { report: Report }) {
   const title = report.name?.trim() || `${KIND_LABEL[report.kind]} sin identificar`;
 
   return (
-    <article className="card flex flex-col overflow-hidden transition-shadow hover:shadow-lg">
-      <div className="relative aspect-[4/3] bg-slate-100">
+    // h-full para que todas las tarjetas de una fila midan lo mismo.
+    <article className="card flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
+      <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
         {photo ? (
-          <img
-            src={photo}
-            alt={`Foto de ${title}`}
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover"
-          />
+          <>
+            {/*
+              La foto se muestra completa (object-contain): recortar puede dejar
+              fuera la cara de quien se busca, que es justo lo que hay que ver.
+              Detrás va la misma imagen ampliada y difuminada para que el hueco
+              no quede vacío; es el mismo archivo, así que no se descarga dos
+              veces.
+            */}
+            <img
+              src={photo}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              className="absolute inset-0 h-full w-full scale-110 object-cover blur-lg"
+            />
+            <img
+              src={photo}
+              alt={`Foto de ${title}`}
+              loading="lazy"
+              decoding="async"
+              className="relative h-full w-full object-contain"
+            />
+          </>
         ) : (
           <div className="flex h-full items-center justify-center">
             <Placeholder className="h-14 w-14 text-slate-300" />
@@ -34,7 +51,10 @@ export function ReportCard({ report }: { report: Report }) {
 
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
-          <h3 className="text-base font-bold leading-tight text-slate-900">{title}</h3>
+          {/* Dos líneas fijas: así un nombre corto y uno largo ocupan igual. */}
+          <h3 className="line-clamp-2 min-h-[2.5rem] text-base font-bold leading-tight text-slate-900">
+            {title}
+          </h3>
           <div className="mt-2 space-y-1.5 text-sm text-slate-600">
             <p className="flex items-center gap-1.5">
               <MapPinIcon className="h-4 w-4 shrink-0 text-slate-400" />
@@ -45,7 +65,7 @@ export function ReportCard({ report }: { report: Report }) {
             </p>
             <p className="flex items-center gap-1.5">
               <ClockIcon className="h-4 w-4 shrink-0 text-slate-400" />
-              <span>Publicado {formatRelative(report.createdAt)}</span>
+              <span className="truncate">Publicado {formatRelative(report.createdAt)}</span>
             </p>
           </div>
         </div>
@@ -54,7 +74,7 @@ export function ReportCard({ report }: { report: Report }) {
           <KindBadge kind={report.kind} />
           <Link
             to={`/reportes/${report.id}`}
-            className="inline-flex min-h-[44px] items-center rounded-xl bg-brand-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-900"
+            className="inline-flex min-h-[44px] shrink-0 items-center rounded-xl bg-brand-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-900"
           >
             Ver detalles
           </Link>

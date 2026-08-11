@@ -155,9 +155,23 @@ export default function ReportDetailPage() {
       {state.justUpdated && <Alert tone="success">Cambios guardados.</Alert>}
 
       <article className="card overflow-hidden">
-        <div className="relative bg-slate-100">
+        <div className="relative overflow-hidden bg-slate-100">
           {photo ? (
-            <img src={photo} alt={`Foto de ${title}`} className="max-h-[26rem] w-full object-cover" />
+            <>
+              {/* Foto completa sobre su propia versión difuminada: aquí es donde
+                  hay que poder mirarla bien, sea vertical, cuadrada o panorámica. */}
+              <img
+                src={photo}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl"
+              />
+              <img
+                src={photo}
+                alt={`Foto de ${title}`}
+                className="relative mx-auto max-h-[28rem] w-auto max-w-full object-contain"
+              />
+            </>
           ) : (
             <div className="flex h-52 items-center justify-center">
               <Placeholder className="h-16 w-16 text-slate-300" />
