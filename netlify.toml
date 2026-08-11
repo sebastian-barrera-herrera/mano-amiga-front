@@ -8,6 +8,9 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # Vite y TypeScript son devDependencies: sin esto, un NODE_ENV=production
+  # definido en el panel de Netlify rompería la compilación.
+  NPM_FLAGS = "--include=dev"
 
 # La app es una SPA: cualquier ruta debe servir index.html.
 [[redirects]]

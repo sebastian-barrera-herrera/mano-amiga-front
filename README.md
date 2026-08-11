@@ -146,8 +146,8 @@ Con [`netlify.toml`](netlify.toml) casi todo está hecho. Sólo hay que:
 
 1. Conectar el repositorio (**Add new site → Import an existing project**).
 2. En **Site configuration → Environment variables**, definir
-   `VITE_API_URL` = `https://mano-amiga-api.onrender.com/api` (o la URL que te dé Render,
-   siempre terminada en `/api`).
+   `VITE_API_URL` = `https://mano-amiga-back.onrender.com/api` (la URL que da Render, siempre
+   terminada en `/api`).
 3. Si usas Google, definir también `VITE_GOOGLE_CLIENT_ID`.
 
 > **Ojo:** Vite incrusta las variables `VITE_*` **al compilar**, no al ejecutar. Si cambias
@@ -162,7 +162,7 @@ de la regla de la SPA. Así el navegador siempre habla con el mismo dominio:
 ```toml
 [[redirects]]
   from = "/api/*"
-  to = "https://tu-api.onrender.com/api/:splat"
+  to = "https://mano-amiga-back.onrender.com/api/:splat"
   status = 200
   force = true
 ```
